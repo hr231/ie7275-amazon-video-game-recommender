@@ -1,0 +1,16 @@
+{
+  "model": "popularity",
+  "stage": "test",
+  "users": 10049,
+  "precision@10": 0.0056224499950243804,
+  "recall@10": 0.030217765432378762,
+  "ndcg@10": 0.014859390902471115,
+  "hit_rate@10": 0.053537665439347196,
+  "coverage": 0.0006231823847112588,
+  "personalization": 0.010989388461506766,
+  "fit_s": 0.0,
+  "score_s": 1.44,
+  "params": {
+    "window_days": 180
+  }
+}

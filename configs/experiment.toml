@@ -1,0 +1,67 @@
+# Hyperparameter grids searched on the VALID stage (history = train, targets = valid).
+# The best config by ndcg@k is refit on train+valid and evaluated once on TEST.
+# Every grid point is a full fit, so keep grids small. Timings are for an M4 Pro laptop.
+#
+# half_life_days (ALS, content, NCF): weight each history interaction by
+# 0.5 ** (age_days / half_life_days); 0 = no time decay. Under this temporal split it is the
+# single most important knob.
+
+[eval]
+k = 10
+batch_size = 1024
+
+[popularity.grid]                        # 8 configs, ~15 s total
+window_days = [0, 7, 14, 30, 60, 90, 180, 365]   # 0 = all history
+
+[als.grid]                               # 12 configs, ~20 s each
+factors = [128]
+regularization = [0.05]
+alpha = [10.0, 40.0]
+iterations = [20]
+weighting = ["binary", "bm25"]
+half_life_days = [0.0, 180.0, 365.0]
+
+[content.grid]                           # 6 configs, ~15 s each
+max_features = [50000]
+min_df = [2]
+ngram_max = [1, 2]
+half_life_days = [0.0, 90.0, 365.0]
+
+[ncf.grid]                               # 6 configs, ~5 s per epoch on Apple MPS
+mf_dim = [32]
+mlp_layers = [[64, 32, 16]]
+n_neg = [4]
+epochs = [2, 4, 6]
+batch_size = [4096]
+lr = [0.001]
+half_life_days = [0.0, 180.0]
+
+# Hybrids reuse the tuned params of their components from results/<model>/test_summary.json,
+# so run popularity, the cf model, and content first.
+
+[hybrid]                                 # the proposal's hybrid: CF + content only
+cf = "als"
+
+[hybrid.grid]
+alpha = [0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+adaptive_k = [0.0, 1.0, 2.0, 5.0]
+beta = [0.0]
+
+[hybrid_pop]                             # extension: + recent-popularity prior
+cf = "als"
+
+[hybrid_pop.grid]
+alpha = [0.4, 0.5, 0.6, 0.7]
+adaptive_k = [0.0, 2.0]
+beta = [0.1, 0.2, 0.3, 0.4]
+
+[report]
+# Paired comparisons of per-user test NDCG@10 (bootstrap CI + paired t-test).
+compare = [
+    ["hybrid", "als"],
+    ["hybrid", "content"],
+    ["hybrid_pop", "hybrid"],
+    ["hybrid_pop", "popularity"],
+    ["als", "popularity"],
+    ["ncf", "als"],
+]

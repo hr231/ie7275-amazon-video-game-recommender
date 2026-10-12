@@ -1,0 +1,25 @@
+# Data is downloaded by `vgrec download`; never commit it.
+data/raw/
+data/processed/
+
+# Experiment outputs: keep the small summary tables, ignore the bulky per-user files.
+results/**/*.parquet
+results/**/*.npy
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
