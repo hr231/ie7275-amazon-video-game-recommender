@@ -1,0 +1,26 @@
+{
+  "model": "ncf",
+  "stage": "valid",
+  "users": 11403,
+  "precision@10": 0.004674208541611857,
+  "recall@10": 0.025081065170859413,
+  "ndcg@10": 0.013362579425390451,
+  "hit_rate@10": 0.04411119880733141,
+  "coverage": 0.000826949860724234,
+  "personalization": 0.06160131236986033,
+  "fit_s": 4.61,
+  "score_s": 6.76,
+  "params": {
+    "mf_dim": 32,
+    "mlp_layers": [
+      64,
+      32,
+      16
+    ],
+    "n_neg": 4,
+    "epochs": 2,
+    "batch_size": 4096,
+    "lr": 0.001,
+    "half_life_days": 180.0
+  }
+}

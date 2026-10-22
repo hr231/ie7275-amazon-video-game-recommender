@@ -1,0 +1,26 @@
+{
+  "model": "ncf",
+  "stage": "test",
+  "users": 10049,
+  "precision@10": 0.005702059906458354,
+  "recall@10": 0.03032989885130888,
+  "ndcg@10": 0.015781712223170808,
+  "hit_rate@10": 0.05483132650014927,
+  "coverage": 0.0006647278770253427,
+  "personalization": 0.02113962641971534,
+  "fit_s": 4.79,
+  "score_s": 5.98,
+  "params": {
+    "mf_dim": 32,
+    "mlp_layers": [
+      64,
+      32,
+      16
+    ],
+    "n_neg": 4,
+    "epochs": 2,
+    "batch_size": 4096,
+    "lr": 0.001,
+    "half_life_days": 180.0
+  }
+}
