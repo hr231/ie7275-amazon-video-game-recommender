@@ -21,7 +21,7 @@ uv run vgrec run --model popularity     # tune on valid, refit, evaluate on test
 uv run vgrec report                     # results/summary.csv + by-history + significance
 ```
 
-`make all` runs the whole pipeline once every model is implemented (`make help` lists targets).
+`make all` runs the whole pipeline, about 15 minutes on an Apple-silicon Mac (`make help` lists targets).
 Without `make` (e.g. Windows), run the commands above directly.
 
 Prefer pip? `uv export --no-hashes --no-dev > requirements.txt`, then
@@ -36,7 +36,11 @@ Prefer pip? `uv export --no-hashes --no-dev > requirements.txt`, then
 | Metrics + batched full-ranking evaluator (`metrics.py`, `evaluate.py`) | done |
 | Grid search → refit → test runner, report tables (`experiment.py`) | done |
 | Popularity baseline (`models/popularity.py`) | done: test NDCG@10 = 0.0149 |
-| ALS, content TF-IDF, NeuMF, hybrids (`models/*.py`, `run_hybrid`) | **stubs: to implement next** |
+| Implicit ALS with time decay (`models/als.py`) | done: test NDCG@10 = 0.0187 |
+| TF-IDF content model (`models/content.py`) | done: test NDCG@10 = 0.0099 |
+| NeuMF (`models/ncf.py`) | done: test NDCG@10 = 0.0158 |
+| CF + content hybrid / + popularity prior (`models/hybrid.py`, `run_hybrid`) | done: test NDCG@10 = 0.0204 / 0.0218 |
+| Report tables, notebook write-ups, final report | to do |
 
 ## Layout
 
