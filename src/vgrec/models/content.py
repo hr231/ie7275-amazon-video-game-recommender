@@ -1,7 +1,4 @@
-"""Content-based recommender: TF-IDF item vectors + per-user profile, scored by cosine similarity.
-
-STUB: fit() and score() are not implemented yet.
-"""
+"""Content-based recommender: TF-IDF item vectors + per-user profile, scored by cosine similarity."""
 
 from __future__ import annotations
 
@@ -10,7 +7,7 @@ from collections.abc import Sequence
 import numpy as np
 
 from vgrec.models.base import Recommender
-from vgrec.protocol import TrainData
+from vgrec.protocol import TrainData, recency_weights
 
 
 class ContentTfidf(Recommender):
@@ -34,7 +31,21 @@ class ContentTfidf(Recommender):
         self.half_life_days = half_life_days
 
     def fit(self, train: TrainData) -> ContentTfidf:
-        raise NotImplementedError("ContentTfidf.fit is not implemented yet")
+        from sklearn.feature_extraction.text import TfidfVectorizer
+        from sklearn.preprocessing import normalize
+
+        if len(self.item_text) != train.n_items:
+            raise ValueError(f"{len(self.item_text)} item texts for {train.n_items} items")
+        vectorizer = TfidfVectorizer(
+            stop_words="english", max_features=self.max_features, min_df=self.min_df,
+            max_df=self.max_df, ngram_range=(1, self.ngram_max), sublinear_tf=True,
+            dtype=np.float32)
+        self.item_vectors_ = vectorizer.fit_transform(self.item_text).tocsr()  # rows are L2-normalized
+        self.vocabulary_size_ = len(vectorizer.vocabulary_)
+        self._item_vectors_t = self.item_vectors_.T.tocsr()
+        profiles = recency_weights(train, self.half_life_days) @ self.item_vectors_
+        self.user_profiles_ = normalize(profiles).astype(np.float32).tocsr()
+        return self
 
     def score(self, users: np.ndarray) -> np.ndarray:
-        raise NotImplementedError("ContentTfidf.score is not implemented yet")
+        return (self.user_profiles_[users] @ self._item_vectors_t).toarray().astype(np.float32)

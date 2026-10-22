@@ -1,0 +1,19 @@
+{
+  "model": "content",
+  "stage": "valid",
+  "users": 11403,
+  "precision@10": 0.002736122073138648,
+  "recall@10": 0.015286987146366256,
+  "ndcg@10": 0.008822815921970612,
+  "hit_rate@10": 0.02543190388494256,
+  "coverage": 0.6532903899721448,
+  "personalization": 0.9978223048760252,
+  "fit_s": 6.64,
+  "score_s": 14.53,
+  "params": {
+    "max_features": 50000,
+    "min_df": 2,
+    "ngram_max": 2,
+    "half_life_days": 90.0
+  }
+}

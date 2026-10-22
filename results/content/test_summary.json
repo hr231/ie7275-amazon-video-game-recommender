@@ -1,0 +1,19 @@
+{
+  "model": "content",
+  "stage": "test",
+  "users": 10049,
+  "precision@10": 0.0028659568116230476,
+  "recall@10": 0.01622359103949312,
+  "ndcg@10": 0.009886857456419372,
+  "hit_rate@10": 0.027564931834013335,
+  "coverage": 0.6260074781886166,
+  "personalization": 0.9980241561571231,
+  "fit_s": 7.05,
+  "score_s": 13.28,
+  "params": {
+    "max_features": 50000,
+    "min_df": 2,
+    "ngram_max": 2,
+    "half_life_days": 90.0
+  }
+}
