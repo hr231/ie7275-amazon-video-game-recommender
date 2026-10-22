@@ -1,0 +1,46 @@
+{
+  "model": "hybrid_pop",
+  "stage": "test",
+  "users": 10049,
+  "precision@10": 0.007264404418350085,
+  "recall@10": 0.04118655833760894,
+  "ndcg@10": 0.02177790132265786,
+  "hit_rate@10": 0.0685640362225097,
+  "coverage": 0.13701703365184878,
+  "personalization": 0.5349961343873618,
+  "fit_s": 28.65,
+  "score_s": 15.1,
+  "params": {
+    "alpha": 0.5,
+    "adaptive_k": 0.0,
+    "beta": 0.3,
+    "components": {
+      "cf": {
+        "model": "als",
+        "params": {
+          "factors": 128,
+          "regularization": 0.05,
+          "alpha": 10.0,
+          "iterations": 20,
+          "weighting": "bm25",
+          "half_life_days": 180.0
+        }
+      },
+      "content": {
+        "model": "content",
+        "params": {
+          "max_features": 50000,
+          "min_df": 2,
+          "ngram_max": 2,
+          "half_life_days": 90.0
+        }
+      },
+      "popularity": {
+        "model": "popularity",
+        "params": {
+          "window_days": 180
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "model": "hybrid",
+  "stage": "valid",
+  "users": 11403,
+  "precision@10": 0.005770411295273174,
+  "recall@10": 0.03178727809106653,
+  "ndcg@10": 0.019183287821376876,
+  "hit_rate@10": 0.05296851705691485,
+  "coverage": 0.15011316155988857,
+  "personalization": 0.9824427352218832,
+  "fit_s": 25.66,
+  "score_s": 2.32,
+  "params": {
+    "alpha": 0.7,
+    "adaptive_k": 0.0,
+    "beta": 0.0,
+    "components": {
+      "cf": {
+        "model": "als",
+        "params": {
+          "factors": 128,
+          "regularization": 0.05,
+          "alpha": 10.0,
+          "iterations": 20,
+          "weighting": "bm25",
+          "half_life_days": 180.0
+        }
+      },
+      "content": {
+        "model": "content",
+        "params": {
+          "max_features": 50000,
+          "min_df": 2,
+          "ngram_max": 2,
+          "half_life_days": 90.0
+        }
+      }
+    }
+  }
+}

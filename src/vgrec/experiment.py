@@ -11,6 +11,7 @@ import json
 import tomllib
 from collections.abc import Sequence
 from pathlib import Path
+from time import perf_counter
 
 import numpy as np
 import pandas as pd
@@ -18,7 +19,7 @@ import pandas as pd
 from vgrec.analysis import by_history_bucket, paired_bootstrap
 from vgrec.config import CONFIG_PATH, RESULTS_DIR
 from vgrec.data import Dataset
-from vgrec.evaluate import EvalResult, evaluate
+from vgrec.evaluate import EvalResult, evaluate, mask_unavailable, result_from_topk, top_k
 from vgrec.models import build_model
 from vgrec.protocol import EvalSplit, make_split
 
@@ -81,8 +82,57 @@ def run_model(name: str, ds: Dataset, cfg: dict, *, item_text: Sequence[str] | N
 def run_hybrid(name: str, ds: Dataset, cfg: dict, *, item_text: Sequence[str],
                splits: tuple[EvalSplit, EvalSplit] | None = None,
                out_dir: Path = RESULTS_DIR) -> dict:
-    """Blend the already-tuned component models (cfg[name]) and tune the blend weights on valid."""
-    raise NotImplementedError("experiment.run_hybrid is not implemented yet")
+    """Blend the already-tuned component models (cfg[name]) and tune the blend weights on valid.
+
+    Components are fitted once per stage and each user batch is scored once; every grid point
+    only re-blends those scores, so a 30-point grid costs about one evaluation.
+    """
+    from vgrec.models.hybrid import Hybrid
+
+    k, batch_size = cfg["eval"]["k"], cfg["eval"]["batch_size"]
+    metric = f"ndcg@{k}"
+    grid = expand_grid(cfg[name]["grid"])
+    roles = {"cf": cfg[name]["cf"], "content": "content"}
+    if any(point.get("beta", 0.0) > 0 for point in grid):
+        roles["popularity"] = "popularity"
+    tuned = {}
+    for model_name in roles.values():
+        path = out_dir / model_name / "test_summary.json"
+        if not path.exists():
+            raise FileNotFoundError(f"{path} missing: run `vgrec run --model {model_name}` before {name}")
+        tuned[model_name] = json.loads(path.read_text())["params"]
+    valid, test = splits or (make_split(ds, "valid"), make_split(ds, "test"))
+
+    def evaluate_grid(split: EvalSplit, points: list[dict]) -> list[EvalResult]:
+        start = perf_counter()
+        parts_models = {role: build_model(model_name, tuned[model_name], item_text=item_text)
+                        .fit(split.train) for role, model_name in roles.items()}
+        fit_seconds = perf_counter() - start
+        hybrids = [Hybrid(**parts_models, **point, fit_components=False).fit(split.train)
+                   for point in points]
+        topks = [np.empty((len(split.eval_users), k), dtype=np.int64) for _ in points]
+        start = perf_counter()
+        for lo in range(0, len(split.eval_users), batch_size):
+            users = split.eval_users[lo : lo + batch_size]
+            parts = hybrids[0].components(users)
+            for hybrid, topk in zip(hybrids, topks, strict=True):
+                scores = mask_unavailable(hybrid.blend(parts, users), users, split)
+                topk[lo : lo + len(users)] = top_k(scores, k)
+        score_seconds = (perf_counter() - start) / len(points)
+        return [result_from_topk(name, split, topk, fit_seconds, score_seconds) for topk in topks]
+
+    valid_results = evaluate_grid(valid, grid)
+    rows = [{**point, **result.summary()} for point, result in zip(grid, valid_results, strict=True)]
+    for point, row in zip(grid, rows, strict=True):
+        _print_row(point, row, metric)
+    best = max(range(len(grid)), key=lambda i: rows[i][metric])
+    saved_params = {**grid[best], "components": {role: {"model": m, "params": tuned[m]}
+                                                 for role, m in roles.items()}}
+    model_dir = out_dir / name
+    save_result(valid_results[best], model_dir, saved_params)
+    pd.DataFrame(rows).to_csv(model_dir / "valid_grid.csv", index=False)
+    (test_result,) = evaluate_grid(test, [grid[best]])
+    return save_result(test_result, model_dir, saved_params)
 
 
 def report(out_dir: Path = RESULTS_DIR, cfg: dict | None = None) -> dict[str, pd.DataFrame]:
