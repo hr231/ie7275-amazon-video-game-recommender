@@ -1,0 +1,21 @@
+{
+  "model": "als",
+  "stage": "test",
+  "users": 10049,
+  "precision@10": 0.005532888844661161,
+  "recall@10": 0.029876571779539205,
+  "ndcg@10": 0.01872148775252871,
+  "hit_rate@10": 0.050950343317743056,
+  "coverage": 0.08724553385957623,
+  "personalization": 0.9804484221581765,
+  "fit_s": 19.29,
+  "score_s": 1.43,
+  "params": {
+    "factors": 128,
+    "regularization": 0.05,
+    "alpha": 10.0,
+    "iterations": 20,
+    "weighting": "bm25",
+    "half_life_days": 180.0
+  }
+}
