@@ -40,7 +40,8 @@ Prefer pip? `uv export --no-hashes --no-dev > requirements.txt`, then
 | TF-IDF content model (`models/content.py`) | done: test NDCG@10 = 0.0099 |
 | NeuMF (`models/ncf.py`) | done: test NDCG@10 = 0.0158 |
 | CF + content hybrid / + popularity prior (`models/hybrid.py`, `run_hybrid`) | done: test NDCG@10 = 0.0204 / 0.0218 |
-| Report tables, notebook write-ups, final report | to do |
+| Report tables, notebook write-ups (`notebooks/`) | done |
+| Final report (`reports/final_report.docx`, figures via `reports/make_figures.py`) | done |
 
 ## Layout
 
